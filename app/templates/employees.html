@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>従業員情報</title>
     <style>
+        * {
+            font-size: 12px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -20,19 +23,21 @@
 <body>
     <h1>従業員情報</h1>
     <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>従業員番号</th>
-                <th>名前</th>
-            </tr>
-        </thead>
         <tbody>
-            {% for employee in employees %}
+            {% for employee in employees_base %}
             <tr>
                 <td>{{ employee.id }}</td>
                 <td>{{ employee.num }}</td>
+                <td>{{ employee.entry_date }}</td>
+                <td>{{ employee.retire_date }}</td>
                 <td>{{ employee.display_name }}</td>
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.name_kana }}</td>
+                <td>{{ employee.sex }}</td>
+                <td>{{ employee.birth_date }}｜{{ employee.age }} 才</td>
+                <td>〒{{ employee.zipcode }}　{{ employee.prefecture }}{{ employee.address }}</td>
+                <td>{{ employee.phone }}</td>
+                <td>{{ employee.married }}</td>
             </tr>
             {% endfor %}
         </tbody>

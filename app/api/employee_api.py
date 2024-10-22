@@ -2,7 +2,7 @@ import requests
 import logging
 
 # ログの設定
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class FreeeAPI:
     def __init__(self, api_key):
@@ -29,7 +29,7 @@ class FreeeAPI:
                 "offset": offset,
                 "with_no_payroll_calculation": str(with_no_payroll_calculation).lower()
             }
-            # logging.info(f"Request URL: {url}")
+            logging.info(f"Request URL: {url}")
             # logging.info(f"Request Headers: {headers}")
             # logging.info(f"Request Params: {params}")
             response = requests.get(url, headers=headers, params=params)

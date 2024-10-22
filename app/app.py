@@ -5,6 +5,7 @@ import os
 import requests
 import json
 from datetime import datetime
+from utils.db_utils import get_prefecture_name
 from api.employee_api import FreeeAPI
 from api.token_utils import get_valid_access_token, save_tokens_to_db
 
@@ -51,7 +52,8 @@ def callback():
         return f"エラー: {response.status_code}", 500
 
 @app.route('/employees')
-def employees():
+# 従業員一覧からを取得
+def employees_base():
     try:
         access_token = get_valid_access_token()
         freee_api = FreeeAPI(access_token)
@@ -59,16 +61,37 @@ def employees():
         now = datetime.now()
         year = now.year
         month = now.month
-        employees_data = freee_api.get_employees(company_id, year, month)
-        # 必要な情報だけを抽出
-        filtered_employees = [{
-            'id': emp['id'], 
-            'num': emp.get('num', 'N/A'), 
-            'display_name': emp.get('display_name', 'N/A')
-        } for emp in employees_data]
-        return render_template('employees.html', employees=filtered_employees)
+        employees_data_base = freee_api.get_employees(company_id, year, month)
+        #キーで検索して配列に詰めなおし
+        filtered_employees_base = [{
+            'id': emp['id'],
+            'num': emp.get('num', 'N/A'),
+            'entry_date': emp.get('entry_date', 'N/A'),
+            'retire_date': emp.get('retire_date', None),
+            'display_name': emp.get('display_name', 'N/A'),
+            'name': f"{emp.get('profile_rule', {}).get('last_name', 'N/A')} {emp.get('profile_rule', {}).get('first_name', 'N/A')}",
+            'name_kana': f"{emp.get('profile_rule', {}).get('last_name_kana', 'N/A')} {emp.get('profile_rule', {}).get('first_name_kana', 'N/A')}",
+            'sex': '男性' if emp.get('profile_rule', {}).get('gender') == 'male' else '女性' if emp.get('profile_rule', {}).get('gender') == 'female' else 'N/A',
+            'birth_date': emp.get('birth_date', 'N/A'),
+            'age': calculate_age(emp.get('birth_date', 'N/A')),
+            'zipcode':f"{emp.get('profile_rule', {}).get('zipcode1', 'N/A')} - {emp.get('profile_rule', {}).get('zipcode2', 'N/A')}",
+            'prefecture': get_prefecture_name(emp.get('profile_rule', {}).get('prefecture_code', 0) + 1),
+            'address': emp.get('profile_rule', {}).get('address', 'N/A'),
+            'phone': f"{emp.get('profile_rule', {}).get('phone1', 'N/A')} - {emp.get('profile_rule', {}).get('phone2', 'N/A')} - {emp.get('profile_rule', {}).get('phone3', 'N/A')}",
+            'married': '未婚' if emp.get('profile_rule', {}).get('married') == False else '既婚' if emp.get('profile_rule', {}).get('married') == True else 'N/A',
+        } for emp in employees_data_base]
+        return render_template('employees.html', employees_base=filtered_employees_base)
     except Exception as e:
         return str(e), 500
+# 全期間従業員から取得
+# 年齢を計算
+def calculate_age(birth_date_str):
+    if birth_date_str == 'N/A':
+        return 'N/A'
+    birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d')
+    today = datetime.today()
+    age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    return age
 
 @app.route('/business_id')
 def business_id():
