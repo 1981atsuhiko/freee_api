@@ -8,11 +8,46 @@ from datetime import datetime
 from utils.db_utils import get_prefecture_name
 from api.employee_api import FreeeAPI
 from api.token_utils import get_valid_access_token, save_tokens_to_db
+import logging
 
 # .envファイルを読み込む
 load_dotenv()
 
 app = Flask(__name__)
+
+# ログの設定
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# カスタムフィルタの定義
+def get_payment_amount(payments, name):
+    for payment in payments:
+        if payment['name'] == name:
+            return int(float(payment['amount']))
+    return 'N/A'
+
+def get_overtime_details(overtime_pays, name):
+    for item in overtime_pays:
+        if item['name'] == name:
+            # 分を時間に変換し、小数点第2位までにフォーマット
+            time_in_minutes = item['time'] if item['time'] is not None else 0
+            hours = float(time_in_minutes) / 60
+            formatted_hours = "{:.2f}".format(hours)
+            return {
+                'time': formatted_hours,
+                'amount': int(float(item['amount']))
+            }
+    return {'time': 'N/A', 'amount': 'N/A'}
+
+def get_custom_field_value(custom_fields, name):
+    for group in custom_fields.get('profile_custom_field_groups', []):
+        for field in group.get('profile_custom_field_rules', []):
+            if field['name'] == name:
+                return field['value'] or field['file_name']
+    return 'N/A'
+
+app.jinja_env.filters['get_payment_amount'] = get_payment_amount
+app.jinja_env.filters['get_overtime_details'] = get_overtime_details
+app.jinja_env.filters['get_custom_field_value'] = get_custom_field_value
 
 # 環境変数からクライアントID、クライアントシークレット、リダイレクトURIを取得
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -47,8 +82,8 @@ def callback():
         return render_template('callback.html')
     else:
         error_info = response.json()
-        print(f"エラー: {response.status_code}")
-        print(error_info)
+        logging.error(f"エラー: {response.status_code}")
+        logging.error(error_info)
         return f"エラー: {response.status_code}", 500
 
 @app.route('/employees')
@@ -59,7 +94,7 @@ def employees():
         company_id = 10426042  # 取得した事業所IDを使用
         now = datetime.now()
         year = now.year
-        month = now.month
+        month = now.month - 1  # 前月のデータを取得
         base_date = now.strftime('%Y-%m-%d')
 
         # employees_base を取得
@@ -86,6 +121,7 @@ def employees():
         # all_employees を取得
         employees_data_all = freee_api.get_all_employees(company_id)
         filtered_employees_all = [{
+            'id': employee['id'],
             'num': employee.get('num', 'N/A'),
             'out_display_name': employee.get('display_name', 'N/A'),
             'email': employee.get('email', 'N/A'),
@@ -97,31 +133,31 @@ def employees():
         memberships_data = freee_api.get_employee_group_memberships(company_id, base_date)
         memberships_dict = {}
         for membership in memberships_data:
-            num = membership.get('num', 'N/A')
+            id = membership.get('id', 'N/A')
             group_memberships = membership.get('group_memberships', [])
-            if num not in memberships_dict:
-                memberships_dict[num] = []
+            if id not in memberships_dict:
+                memberships_dict[id] = []
             for group in group_memberships:
-                memberships_dict[num].append({
+                memberships_dict[id].append({
                     'group_id': group.get('group_id', 'N/A'),
                     'group_code': group.get('group_code', 'N/A'),
                     'group_name': group.get('group_name', 'N/A')
                 })
 
-        # num を主キーとして結合
-        employees_dict = {employee['num']: employee for employee in filtered_employees_base}
+        # id を主キーとして結合
+        employees_dict = {employee['id']: employee for employee in filtered_employees_base}
         for employee in filtered_employees_all:
-            if employee['num'] in employees_dict:
-                employees_dict[employee['num']]['retire_status'] = employee['retire_status']
-                employees_dict[employee['num']]['email'] = employee['email']
+            if employee['id'] in employees_dict:
+                employees_dict[employee['id']]['retire_status'] = employee['retire_status']
+                employees_dict[employee['id']]['email'] = employee['email']
             else:
-                employees_dict[employee['num']] = employee
+                employees_dict[employee['id']] = employee
 
         # 所属情報を結合
         for employee in employees_dict.values():
-            num = employee['num']
-            if num in memberships_dict:
-                employee['group_memberships'] = memberships_dict[num]
+            id = employee['id']
+            if id in memberships_dict:
+                employee['group_memberships'] = memberships_dict[id]
             else:
                 employee['group_memberships'] = [{
                     'group_id': 'N/A',
@@ -129,11 +165,42 @@ def employees():
                     'group_name': 'N/A'
                 }]
 
-        # 結合したデータをリストに変換し、numの昇順で並び替え
-        merged_employees = sorted(employees_dict.values(), key=lambda x: x['num'])
-        print(merged_employees)
+        # 給与情報を取得
+        payroll_statements = freee_api.get_employee_payroll_statements(company_id, year, month)
+        payroll_dict = {statement['employee_num']: statement for statement in payroll_statements}
+
+        # 給与情報を結合
+        for employee in employees_dict.values():
+            num = employee['num']
+            if num in payroll_dict:
+                payroll = payroll_dict[num]
+                employee['payroll'] = {
+                    'employee_num': payroll.get('employee_num', 'N/A'),
+                    'gross_payment_amount': int(float(payroll.get('gross_payment_amount', 'N/A'))),
+                    'payments': payroll.get('payments', []),
+                    'overtime_pays': payroll.get('overtime_pays', [])
+                }
+            else:
+                employee['payroll'] = None
+
+        # カスタム項目情報を取得して結合
+        for employee in employees_dict.values():
+            employee_id = employee['id']
+            try:
+                custom_fields = freee_api.get_employee_profile_custom_fields(company_id, employee_id, year, month)
+                employee['custom_fields'] = custom_fields
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 403:
+                    logging.error(f"403 Forbidden: {employee_id} のカスタム項目情報を取得できませんでした。")
+                else:
+                    raise e
+
+        # 結合したデータをリストに変換し、idの昇順で並び替え
+        merged_employees = sorted(employees_dict.values(), key=lambda x: x['id'])
+        logging.info(merged_employees)
         return render_template('employees.html', employees=merged_employees)
     except Exception as e:
+        logging.error(f"エラーが発生しました: {str(e)}")
         return str(e), 500
 
 def calculate_age(birth_date_str):
@@ -153,6 +220,7 @@ def business_id():
         business_id = user_info['user']['companies'][0]['id']
         return jsonify({"business_id": business_id})
     except Exception as e:
+        logging.error(f"エラーが発生しました: {str(e)}")
         return str(e), 500
 
 if __name__ == '__main__':
