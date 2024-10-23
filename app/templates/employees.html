@@ -7,6 +7,9 @@
         * {
             font-size: 12px;
         }
+        body {
+            overflow-x: auto;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -14,6 +17,7 @@
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
+            white-space: nowrap;
         }
         th {
             background-color: #f2f2f2;
@@ -24,20 +28,63 @@
     <h1>従業員情報</h1>
     <table>
         <tbody>
-            {% for employee in employees_base %}
+            {% for employee in employees %}
             <tr>
                 <td>{{ employee.id }}</td>
                 <td>{{ employee.num }}</td>
                 <td>{{ employee.entry_date }}</td>
-                <td>{{ employee.retire_date }}</td>
-                <td>{{ employee.display_name }}</td>
-                <td>{{ employee.name }}</td>
+                <td>
+                    {% if employee.name == employee.display_name %}
+                        {{ employee.name }}
+                    {% elif employee.name and employee.display_name %}
+                        {{ employee.name }} | {{ employee.display_name }}
+                    {% else %}
+                        {{ employee.out_display_name }}
+                    {% endif %}
+                </td>
                 <td>{{ employee.name_kana }}</td>
+                <td>{{ employee.email }}</td>
+                <td>{{ employee.out_email }}</td>
                 <td>{{ employee.sex }}</td>
-                <td>{{ employee.birth_date }}｜{{ employee.age }} 才</td>
-                <td>〒{{ employee.zipcode }}　{{ employee.prefecture }}{{ employee.address }}</td>
+                <td>{{ employee.birth_date }}</td>
+                <td>{{ employee.age }}</td>
+                <td>〒 {{ employee.zipcode }}</td>
+                <td>{{ employee.prefecture }}{{ employee.address }}</td>
                 <td>{{ employee.phone }}</td>
                 <td>{{ employee.married }}</td>
+                <td>
+                    {% if employee.retire_status == '退職' %}
+                        {{ employee.retire_status }}({{employee.retire_date}})
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.group_memberships %}
+                        {% for group in employee.group_memberships %}
+                            {{ group.group_id }}
+                        {% endfor %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.group_memberships %}
+                        {% for group in employee.group_memberships %}
+                            {{ group.group_code }}
+                        {% endfor %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if employee.group_memberships %}
+                        {% for group in employee.group_memberships %}
+                            {{ group.group_name }}
+                        {% endfor %}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <!-- 社員基本情報はここまで -->
             </tr>
             {% endfor %}
         </tbody>
