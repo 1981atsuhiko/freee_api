@@ -1,92 +1,14 @@
-# -*- coding: utf-8 -*-
-from flask import Flask, jsonify, request, redirect, render_template
-from dotenv import load_dotenv
-import os
-import requests
-import json
-from datetime import datetime
-from utils.db_utils import get_prefecture_name
-from api.employee_api import FreeeAPI
-from api.token_utils import get_valid_access_token, save_tokens_to_db
+from flask import Blueprint, render_template, current_app
 import logging
+import asyncio
+from datetime import datetime
+from api.employee_api import FreeeAPI
+from api.token_utils import get_valid_access_token
+from utils.db_utils import get_prefecture_name
 
-# .envファイルを読み込む
-load_dotenv()
+employees_bp = Blueprint('employees', __name__)
 
-app = Flask(__name__)
-
-# ログの設定
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-# カスタムフィルタの定義
-def get_payment_amount(payments, name):
-    for payment in payments:
-        if payment['name'] == name:
-            return int(float(payment['amount']))
-    return 'N/A'
-
-def get_overtime_details(overtime_pays, name):
-    for item in overtime_pays:
-        if item['name'] == name:
-            # 分を時間に変換し、小数点第2位までにフォーマット
-            time_in_minutes = item['time'] if item['time'] is not None else 0
-            hours = float(time_in_minutes) / 60
-            formatted_hours = "{:.2f}".format(hours)
-            return {
-                'time': formatted_hours,
-                'amount': int(float(item['amount']))
-            }
-    return {'time': 'N/A', 'amount': 'N/A'}
-
-def get_custom_field_value(custom_fields, name):
-    for group in custom_fields.get('profile_custom_field_groups', []):
-        for field in group.get('profile_custom_field_rules', []):
-            if field['name'] == name:
-                return field['value'] or field['file_name']
-    return 'N/A'
-
-app.jinja_env.filters['get_payment_amount'] = get_payment_amount
-app.jinja_env.filters['get_overtime_details'] = get_overtime_details
-app.jinja_env.filters['get_custom_field_value'] = get_custom_field_value
-
-# 環境変数からクライアントID、クライアントシークレット、リダイレクトURIを取得
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = os.getenv("REDIRECT_URI")
-
-@app.route('/')
-def home():
-    return 'Hello, Flask!'
-
-@app.route('/login')
-def login():
-    auth_code_url = f"https://accounts.secure.freee.co.jp/public_api/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=read"
-    return redirect(auth_code_url)
-
-@app.route('/callback')
-def callback():
-    auth_code = request.args.get('code')
-    data = {
-        "grant_type": "authorization_code",
-        "code": auth_code,
-        "redirect_uri": REDIRECT_URI,
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET
-    }
-    response = requests.post("https://accounts.secure.freee.co.jp/public_api/token", data=data)
-    if response.status_code == 200:
-        token_info = response.json()
-        access_token = token_info["access_token"]
-        refresh_token = token_info["refresh_token"]
-        save_tokens_to_db(access_token, refresh_token)
-        return render_template('callback.html')
-    else:
-        error_info = response.json()
-        logging.error(f"エラー: {response.status_code}")
-        logging.error(error_info)
-        return f"エラー: {response.status_code}", 500
-
-@app.route('/employees')
+@employees_bp.route('/employees')
 def employees():
     try:
         access_token = get_valid_access_token()
@@ -97,8 +19,16 @@ def employees():
         month = now.month - 1  # 前月のデータを取得
         base_date = now.strftime('%Y-%m-%d')
 
-        # employees_base を取得
-        employees_data_base = freee_api.get_employees(company_id, year, month)
+        async def fetch_data():
+            employees_data_base = await freee_api.get_employees(company_id, year, month)
+            employees_data_all = await freee_api.get_all_employees(company_id)
+            memberships_data = await freee_api.get_employee_group_memberships(company_id, base_date)
+            payroll_statements = await freee_api.get_employee_payroll_statements(company_id, year, month)
+
+            return employees_data_base, employees_data_all, memberships_data, payroll_statements
+
+        employees_data_base, employees_data_all, memberships_data, payroll_statements = asyncio.run(fetch_data())
+
         filtered_employees_base = [{
             'id': employee['id'],
             'num': employee.get('num', 'N/A'),
@@ -118,8 +48,6 @@ def employees():
             'married': '未婚' if employee.get('profile_rule', {}).get('married') == False else '既婚' if employee.get('profile_rule', {}).get('married') == True else 'N/A',
         } for employee in employees_data_base]
 
-        # all_employees を取得
-        employees_data_all = freee_api.get_all_employees(company_id)
         filtered_employees_all = [{
             'id': employee['id'],
             'num': employee.get('num', 'N/A'),
@@ -129,8 +57,6 @@ def employees():
             'retire_status': '退職' if employee.get('retire_date') else None
         } for employee in employees_data_all]
 
-        # employee_group_memberships を取得
-        memberships_data = freee_api.get_employee_group_memberships(company_id, base_date)
         memberships_dict = {}
         for membership in memberships_data:
             id = membership.get('id', 'N/A')
@@ -144,7 +70,6 @@ def employees():
                     'group_name': group.get('group_name', 'N/A')
                 })
 
-        # id を主キーとして結合
         employees_dict = {employee['id']: employee for employee in filtered_employees_base}
         for employee in filtered_employees_all:
             if employee['id'] in employees_dict:
@@ -153,7 +78,6 @@ def employees():
             else:
                 employees_dict[employee['id']] = employee
 
-        # 所属情報を結合
         for employee in employees_dict.values():
             id = employee['id']
             if id in memberships_dict:
@@ -165,11 +89,7 @@ def employees():
                     'group_name': 'N/A'
                 }]
 
-        # 給与情報を取得
-        payroll_statements = freee_api.get_employee_payroll_statements(company_id, year, month)
         payroll_dict = {statement['employee_num']: statement for statement in payroll_statements}
-
-        # 給与情報を結合
         for employee in employees_dict.values():
             num = employee['num']
             if num in payroll_dict:
@@ -183,21 +103,18 @@ def employees():
             else:
                 employee['payroll'] = None
 
-        # カスタム項目情報を取得して結合
-        for employee in employees_dict.values():
-            employee_id = employee['id']
-            try:
-                custom_fields = freee_api.get_employee_profile_custom_fields(company_id, employee_id, year, month)
-                employee['custom_fields'] = custom_fields
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 403:
-                    logging.error(f"403 Forbidden: {employee_id} のカスタム項目情報を取得できませんでした。")
-                else:
-                    raise e
+        async def fetch_custom_fields():
+            tasks = []
+            for employee in employees_dict.values():
+                employee_id = employee['id']
+                tasks.append(freee_api.get_employee_profile_custom_fields(company_id, employee_id, year, month))
+            return await asyncio.gather(*tasks)
 
-        # 結合したデータをリストに変換し、idの昇順で並び替え
-        merged_employees = sorted(employees_dict.values(), key=lambda x: x['id'])
-        logging.info(merged_employees)
+        custom_fields_list = asyncio.run(fetch_custom_fields())
+        for employee, custom_fields in zip(employees_dict.values(), custom_fields_list):
+            employee['custom_fields'] = custom_fields
+
+        merged_employees = sorted(employees_dict.values(), key=lambda x: x['num'])
         return render_template('employees.html', employees=merged_employees)
     except Exception as e:
         logging.error(f"エラーが発生しました: {str(e)}")
@@ -210,18 +127,3 @@ def calculate_age(birth_date_str):
     today = datetime.today()
     age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
     return age
-
-@app.route('/business_id')
-def business_id():
-    try:
-        access_token = get_valid_access_token()
-        freee_api = FreeeAPI(access_token)
-        user_info = freee_api.get_user_info()
-        business_id = user_info['user']['companies'][0]['id']
-        return jsonify({"business_id": business_id})
-    except Exception as e:
-        logging.error(f"エラーが発生しました: {str(e)}")
-        return str(e), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)

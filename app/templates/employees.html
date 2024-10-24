@@ -1,181 +1,86 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>従業員情報</title>
-    <style>
-        * {
-            font-size: 12px;
-        }
-        body {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            white-space: nowrap;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
-<body>
-    <h1>従業員情報</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>番号</th>
-                <th>入社日</th>
-                <th>退職状況</th>
-                <th>名前</th>
-                <th>名前（カナ）</th>
-                <th>メール</th>
-                <th>外部メール</th>
-                <th>性別</th>
-                <th>生年月日</th>
-                <th>年齢</th>
-                <th>郵便番号</th>
-                <th>住所</th>
-                <th>電話番号</th>
-                <th>結婚状況</th>
-                <th>部門ID</th>
-                <th>部門コード</th>
-                <th>部門名</th>
-                <th>総支給</th>
-                <th>基本給</th>
-                <th>勤務手当</th>
-                <th>固定残業手当</th>
-                <th>住宅手当</th>
-                <th>リーダー手当</th>
-                <th>一時手当（毎月）</th>
-                <th>資格手当</th>
-                <th>非課税交通費</th>
-                <th>時間外労働</th>
-                <th>休日労働</th>
-                <th>深夜労働</th>
-                <th>残業代</th>
-                <th>カスタム項目</th>
-                <th>採用ルート</th>
-                <th>社用メールPW</th>
-                <th>備考</th>
-                <th>社員ID</th>
-                <th>入社時所持資格</th>
-                <th>スキルシート</th>
-                <th>トラブルフォルダURL</th>
-                <th>参画日</th>
-                <th>参画体系</th>
-                <th>単価情報</th>
-                <th>業種</th>
-                <th>担当フェーズ</th>
-                <th>ポジション</th>
-                <th>言語・ＯＳ等</th>
-                <th>経験年数</th>
-                <th>ポジション</th>
-                <th>所持資格情報</th>
-                <th>技術フェーズ</th>
-                <th>言語・OS</th>
-                <th>ロードマップ(URL)</th>
-                <th>賞与支給</th>
-                <th>給与テーブル（級）</th>
-                <th>給与テーブル（号）</th>
-                <th>カスタム項目</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for employee in employees %}
-            <tr>
-                <td>{{ employee.id }}</td>
-                <td>{{ employee.num }}</td>
-                <td>{{ employee.entry_date }}</td>
-                <td>
-                    {% if employee.retire_status == '退職' %}
-                        {{ employee.retire_status }}({{employee.retire_date}})
-                    {% endif %}
-                </td>
-                <td>
-                    {% if employee.group_memberships %}
-                        {% for group in employee.group_memberships %}
-                            {{ group.group_id }}
-                        {% endfor %}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </td>
-                <td>
-                    {% if employee.name == employee.display_name %}
-                        {{ employee.name }}
-                    {% elif employee.name and employee.display_name %}
-                        {{ employee.name }} | {{ employee.display_name }}
-                    {% else %}
-                        {{ employee.out_display_name }}
-                    {% endif %}
-                </td>
-                <td>{{ employee.name_kana }}</td>
-                <td>{{ employee.email }}</td>
-                <td>{{ employee.out_email }}</td>
-                <td>{{ employee.sex }}</td>
-                <td>{{ employee.birth_date }}</td>
-                <td>{{ employee.age }}</td>
-                <td>〒 {{ employee.zipcode }}</td>
-                <td>{{ employee.prefecture }}{{ employee.address }}</td>
-                <td>{{ employee.phone }}</td>
-                <td>{{ employee.married }}</td>
-                <td>
-                    {% if employee.group_memberships %}
-                        {% for group in employee.group_memberships %}
-                            {{ group.group_code }}
-                        {% endfor %}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </td>
-                <td>
-                    {% if employee.group_memberships %}
-                        {% for group in employee.group_memberships %}
-                            {{ group.group_name }}
-                        {% endfor %}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </td>
-                <!-- 社員基本情報はここまで -->
-                <td>{{ employee.payroll.gross_payment_amount }}</td>
-                {% set basic_pay = employee.payroll.payments | get_payment_amount('基本給') %}
-                <td>{{ basic_pay if basic_pay != 'N/A' else '' }}</td>
-                {% set work_allowance = employee.payroll.payments | get_payment_amount('勤務手当') %}
-                <td>{{ work_allowance if work_allowance != 'N/A' else '' }}</td>
-                {% set fixed_overtime_pay1 = employee.payroll.overtime_pays | get_overtime_details('固定残業手当') %}
-                <td>{{ fixed_overtime_pay1['amount'] if fixed_overtime_pay1['amount'] != 'N/A' else '' }}</td>
-                {% set housing_allowance = employee.payroll.payments | get_payment_amount('住宅手当') %}
-                <td>{{ housing_allowance if housing_allowance != 'N/A' else '' }}</td>
-                {% set leader_allowance = employee.payroll.payments | get_payment_amount('リーダー手当') %}
-                <td>{{ leader_allowance if leader_allowance != 'N/A' else '' }}</td>
-                {% set temporary_allowance = employee.payroll.payments | get_payment_amount('一時手当（毎月）') %}
-                <td>{{ temporary_allowance if temporary_allowance != 'N/A' else '' }}</td>
-                {% set qualification_allowance = employee.payroll.payments | get_payment_amount('資格手当') %}
-                <td>{{ qualification_allowance if qualification_allowance != 'N/A' else '' }}</td>
-                {% set non_taxable_transportation = employee.payroll.payments | get_payment_amount('非課税交通費') %}
-                <td>{{ non_taxable_transportation if non_taxable_transportation != 'N/A' else '' }}</td>
-                {% set overtime_details = employee.payroll.overtime_pays | get_overtime_details('時間外労働') %}
-                <td>{{ overtime_details['time'] if overtime_details['time'] != 'N/A' else '' }}</td>
-                {% set holiday_details = employee.payroll.overtime_pays | get_overtime_details('休日労働') %}
-                <td>{{ overtime_details['time'] if overtime_details['time'] != 'N/A' else '' }}</td>
-                {% set midnight_details = employee.payroll.overtime_pays | get_overtime_details('深夜労働') %}
-                <td>{{ midnight_details['time'] if midnight_details['time'] != 'N/A' else '' }}</td>
-                {% set fixed_overtime_pay2 = employee.payroll.overtime_pays | get_overtime_details('固定残業代') %}
-                <td>{{ fixed_overtime_pay2['amount'] if fixed_overtime_pay2['amount'] != 'N/A' else '' }}</td>
-                <!-- 給与情報はここまで -->
-                 <td>{{ employee.custom_fields | get_custom_field_value('採用ルート') }}</td>
-                <td>{{ employee.custom_fields }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}従業員情報{% endblock %}
+
+{% block content %}
+<h1>従業員情報</h1>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>番号</th>
+            <th>入社日</th>
+            <th>退職状況</th>
+            <th>部門名</th>
+            <th>名前</th>
+            <th>名前（カナ）</th>
+            <th>メール</th>
+            <th>外部メール</th>
+            <th>性別</th>
+            <th>生年月日</th>
+            <th>年齢</th>
+            <th>郵便番号</th>
+            <th>住所</th>
+            <th>電話番号</th>
+            <th>結婚状況</th>
+            <th>総支給</th>
+            <th>基本給</th>
+            <th>勤務手当</th>
+            <th>固定残業手当</th>
+            <th>住宅手当</th>
+            <th>リーダー手当</th>
+            <th>一時手当（毎月）</th>
+            <th>資格手当</th>
+            <th>非課税交通費</th>
+            <th>時間外労働</th>
+            <th>休日労働</th>
+            <th>深夜労働</th>
+            <th>残業代</th>
+            <th>採用ルート</th>
+            <th>社用メールPW</th>
+            <th>備考</th>
+            <th>入社時健康診断書</th>
+            <th>個人情報取り扱い同意書(従業員)</th>
+            <th>住民票</th>
+            <th>身元保証書</th>
+            <th>秘密保持契約_誓約書</th>
+            <th>社員ID</th>
+            <th>入社時所持資格</th>
+            <th>スキルシート</th>
+            <th>トラブルフォルダURL</th>
+            <th>業務改善依頼書</th>
+            <th>参画日</th>
+            <th>参画体系</th>
+            <th>単価情報</th>
+            <th>業種</th>
+            <th>担当フェーズ</th>
+            <th>ポジション</th>
+            <th>言語・ＯＳ等</th>
+            <th>経験年数</th>
+            <th>ポジション</th>
+            <th>所持資格情報</th>
+            <th>技術フェーズ</th>
+            <th>言語・OS</th>
+            <th>ロードマップ(URL)</th>
+            <th>賞与支給</th>
+            <th>給与テーブル</th>
+            <th>内定通知書</th>
+            <th>雇用契約書_内定時(労働条件通知書)</th>
+            <th>雇用契約書_更新時(労働条件通知書）</th>
+            <th>昇給通知書</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for employee in employees %}
+        <tr>
+            <!-- 社員基本情報表示 -->
+            {% include 'include/basic_info.html' %}
+            <!-- 給与情報表示 -->
+            {% include 'include/payroll_info.html' %}
+            <!-- カスタム項目表示 -->
+            {% include 'include/custom_fields.html' %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

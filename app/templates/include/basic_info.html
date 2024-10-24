@@ -1,0 +1,41 @@
+<!-- templates/include/basic_info.html -->
+<td>{{ employee.id }}</td>
+<td>{{ employee.num }}</td>
+<td>{{ employee.entry_date }}</td>
+<td>
+    {% if employee.retire_status == '退職' %}
+        {{ employee.retire_status }}({{employee.retire_date}})
+    {% endif %}
+</td>
+<td>
+    {% if employee.group_memberships %}
+        {% for group in employee.group_memberships %}
+            {{ group.group_name if group.group_name != 'N/A' else '' }}
+        {% endfor %}
+    {% else %}
+        <!-- N/A -->
+    {% endif %}
+</td>
+<td>
+    {% if employee.name == employee.display_name %}
+        {{ employee.name }}
+    {% elif employee.name and employee.display_name %}
+        {{ employee.name }} | {{ employee.display_name }}
+    {% else %}
+        {{ employee.out_display_name }}
+    {% endif %}
+</td>
+<td>{{ employee.name_kana }}</td>
+<td>{{ employee.email if employee.email is not none else '' }}</td>
+<td>{{ employee.out_email }}</td>
+<td>{{ employee.sex }}</td>
+<td>{{ employee.birth_date }}</td>
+<td>{{ employee.age }}</td>
+<td>
+    {% if employee.zipcode %}
+        〒 {{ employee.zipcode }}
+    {% endif %}
+</td>
+<td>{{ employee.prefecture }}{{ employee.address }}</td>
+<td>{{ employee.phone }}</td>
+<td>{{ employee.married }}</td>
