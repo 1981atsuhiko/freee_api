@@ -3,17 +3,120 @@
 {% block title %}従業員情報{% endblock %}
 
 {% block content %}
+
 <h1>従業員情報</h1>
+<button id="openModalBtn">カラム表示設定</button>
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>カラム表示設定</h2>
+        <form id="columnForm" method="GET" action="/employees">
+            <div>
+                <label for="monthSelect">年月選択:</label>
+                <select id="monthSelect" name="month">
+                    <option value="202405">202405</option>
+                    <!-- JavaScriptでオプションを動的に追加 -->
+                </select>
+                <input type="submit">適用</input>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="6" checked> 入社日</label>
+                <label><input type="checkbox" class="column-toggle" data-column="7" checked> 退職状況</label>
+                <label><input type="checkbox" class="column-toggle" data-column="8" checked> 部門名</label>
+                <label><input type="checkbox" class="column-toggle" data-column="9" checked> メール</label>
+                <label><input type="checkbox" class="column-toggle" data-column="10" checked> 外部メール</label>
+                <label><input type="checkbox" class="column-toggle" data-column="11" checked> 性別</label>
+                <label><input type="checkbox" class="column-toggle" data-column="12" checked> 生年月日</label>
+                <label><input type="checkbox" class="column-toggle" data-column="13" checked> 年齢</label>
+                <label><input type="checkbox" class="column-toggle" data-column="14" checked> 郵便番号</label>
+                <label><input type="checkbox" class="column-toggle" data-column="15" checked> 住所</label>
+                <label><input type="checkbox" class="column-toggle" data-column="16" checked> 電話番号</label>
+                <label><input type="checkbox" class="column-toggle" data-column="17" checked> 結婚状況</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="18" checked> 総支給</label>
+                <label><input type="checkbox" class="column-toggle" data-column="19" checked> 基本給</label>
+                <label><input type="checkbox" class="column-toggle" data-column="20" checked> 勤務手当</label>
+                <label><input type="checkbox" class="column-toggle" data-column="21" checked> 固定残業手当</label>
+                <label><input type="checkbox" class="column-toggle" data-column="22" checked> 住宅手当</label>
+                <label><input type="checkbox" class="column-toggle" data-column="23" checked> リーダー手当</label>
+                <label><input type="checkbox" class="column-toggle" data-column="24" checked> 一時手当（毎月）</label>
+                <label><input type="checkbox" class="column-toggle" data-column="25" checked> 資格手当</label>
+                <label><input type="checkbox" class="column-toggle" data-column="26" checked> 非課税交通費</label>
+                <label><input type="checkbox" class="column-toggle" data-column="27" checked> 時間外労働</label>
+                <label><input type="checkbox" class="column-toggle" data-column="28" checked> 休日労働</label>
+                <label><input type="checkbox" class="column-toggle" data-column="29" checked> 深夜労働</label>
+                <label><input type="checkbox" class="column-toggle" data-column="30" checked> 残業代</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="31" checked> 採用ルート</label>
+                <label><input type="checkbox" class="column-toggle" data-column="32" checked> 社用メールPW</label>
+                <label><input type="checkbox" class="column-toggle" data-column="33" checked> 備考</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="34" checked> 入社時健康診断書</label>
+                <label><input type="checkbox" class="column-toggle" data-column="35" checked> 個人情報取り扱い同意書(従業員)</label>
+                <label><input type="checkbox" class="column-toggle" data-column="36" checked> 住民票</label>
+                <label><input type="checkbox" class="column-toggle" data-column="37" checked> 身元保証書</label>
+                <label><input type="checkbox" class="column-toggle" data-column="38" checked> 秘密保持契約_誓約書</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="39" checked> 入社時所持資格</label>
+                <label><input type="checkbox" class="column-toggle" data-column="40" checked> スキルシート</label>
+                <label><input type="checkbox" class="column-toggle" data-column="41" checked> トラブルフォルダURL</label>
+                <label><input type="checkbox" class="column-toggle" data-column="42" checked> 業務改善依頼書</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="43" checked> 参画日</label>
+                <label><input type="checkbox" class="column-toggle" data-column="44" checked> 参画体系</label>
+                <label><input type="checkbox" class="column-toggle" data-column="45" checked> 単価情報</label>
+                <label><input type="checkbox" class="column-toggle" data-column="46" checked> 業種</label>
+                <label><input type="checkbox" class="column-toggle" data-column="47" checked> 担当フェーズ</label>
+                <label><input type="checkbox" class="column-toggle" data-column="48" checked> ポジション</label>
+                <label><input type="checkbox" class="column-toggle" data-column="49" checked> 言語・ＯＳ等</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="50" checked> 経験年数</label>
+                <label><input type="checkbox" class="column-toggle" data-column="51" checked> ポジション</label>
+                <label><input type="checkbox" class="column-toggle" data-column="52" checked> 所持資格情報</label>
+                <label><input type="checkbox" class="column-toggle" data-column="53" checked> 技術フェーズ</label>
+                <label><input type="checkbox" class="column-toggle" data-column="54" checked> 言語・OS</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="55" checked> ロードマップ(URL)</label>
+                <label><input type="checkbox" class="column-toggle" data-column="56" checked> 賞与支給</label>
+                <label><input type="checkbox" class="column-toggle" data-column="57" checked> 給与テーブル</label>
+            </div>
+            <div class="group-clumn flex">
+                <label><input type="checkbox" class="group-toggle" checked> 全選択</label>
+                <label><input type="checkbox" class="column-toggle" data-column="58" checked> 内定通知書</label>
+                <label><input type="checkbox" class="column-toggle" data-column="59" checked> 雇用契約書_内定時(労働条件通知書)</label>
+                <label><input type="checkbox" class="column-toggle" data-column="60" checked> 雇用契約書_更新時(労働条件通知書）</label>
+                <label><input type="checkbox" class="column-toggle" data-column="61" checked> 昇給通知書</label>
+            </div>
+        </form>
+    </div>
+</div>
+
 <table>
     <thead>
         <tr>
             <th>ID</th>
             <th>番号</th>
+            <th>社員ID</th>
+            <th>名前</th>
+            <th>名前（カナ）</th>
             <th>入社日</th>
             <th>退職状況</th>
             <th>部門名</th>
-            <th>名前</th>
-            <th>名前（カナ）</th>
             <th>メール</th>
             <th>外部メール</th>
             <th>性別</th>
@@ -38,13 +141,11 @@
             <th>残業代</th>
             <th>採用ルート</th>
             <th>社用メールPW</th>
-            <th>備考</th>
             <th>入社時健康診断書</th>
             <th>個人情報取り扱い同意書(従業員)</th>
             <th>住民票</th>
             <th>身元保証書</th>
             <th>秘密保持契約_誓約書</th>
-            <th>社員ID</th>
             <th>入社時所持資格</th>
             <th>スキルシート</th>
             <th>トラブルフォルダURL</th>
@@ -68,9 +169,11 @@
             <th>雇用契約書_内定時(労働条件通知書)</th>
             <th>雇用契約書_更新時(労働条件通知書）</th>
             <th>昇給通知書</th>
+            <th>備考</th>
+            <!-- https://p.secure.freee.co.jp/api/p/employees/2025194/profile_custom_field_rule/8230637/download_file?is_preview=1 -->
         </tr>
     </thead>
-    <tbody>
+    <tbody class="scrollable-tbody">
         {% for employee in employees %}
         <tr>
             <!-- 社員基本情報表示 -->
@@ -83,4 +186,82 @@
         {% endfor %}
     </tbody>
 </table>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var modal = $("#myModal");
+        var btn = $("#openModalBtn");
+        var span = $(".close");
+
+        btn.on("click", function() {
+            modal.show();
+        });
+
+        span.on("click", function() {
+            modal.hide();
+        });
+
+        $(window).on("click", function(event) {
+            if ($(event.target).is(modal)) {
+                modal.hide();
+            }
+        });
+
+        var checkboxes = $(".column-toggle");
+        checkboxes.each(function() {
+            var checkbox = $(this);
+            var column = checkbox.data("column");
+            var th = $("th:nth-child(" + column + ")");
+            var tds = $("td:nth-child(" + column + ")");
+            if (!checkbox.is(":checked")) {
+                th.hide();
+                tds.hide();
+            }
+            checkbox.on("change", function() {
+                if (checkbox.is(":checked")) {
+                    th.show();
+                    tds.show();
+                } else {
+                    th.hide();
+                    tds.hide();
+                }
+            });
+        });
+
+        var groupToggles = $(".group-toggle");
+        groupToggles.each(function() {
+            var groupToggle = $(this);
+            groupToggle.on("change", function() {
+                var group = groupToggle.closest(".group-clumn");
+                var checkboxes = group.find(".column-toggle");
+                checkboxes.each(function() {
+                    var checkbox = $(this);
+                    checkbox.prop("checked", groupToggle.is(":checked"));
+                    checkbox.trigger("change");
+                });
+            });
+        });
+
+        // YYYY/mmのセレクトボックスを動的に生成
+        var monthSelect = $("#monthSelect");
+        var now = new Date();
+        for (var i = 0; i < 12; i++) {
+            var year = now.getFullYear();
+            var month = now.getMonth() + 1; // 月は0から始まるため+1
+            if (month < 10) {
+                month = '0' + month;
+            }
+            var option = $("<option></option>").val(year + '/' + month).text(year + '/' + month);
+            monthSelect.append(option);
+            now.setMonth(now.getMonth() - 1); // 前の月に移動
+        }
+        monthSelect.val(new Date().getFullYear() + '/' + ('0' + (new Date().getMonth() + 1)).slice(-2)); // デフォルトを当月に設定
+
+        // フォーム送信時に選択された年月をログに出力
+        $("#columnForm").on("submit", function(event) {
+            console.log("Selected month:", monthSelect.val());
+        });
+    });
+</script>
+
 {% endblock %}

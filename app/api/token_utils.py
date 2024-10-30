@@ -2,6 +2,7 @@ import sqlite3
 import requests
 import os
 from dotenv import load_dotenv
+from flask import session
 
 # .envファイルを読み込む
 load_dotenv()
@@ -59,3 +60,6 @@ def get_valid_access_token():
     if not access_token:
         access_token = get_access_token()
     return access_token
+
+def is_logged_in():
+    return 'freee_token' in session and session['freee_token'] is not None

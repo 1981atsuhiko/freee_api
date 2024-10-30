@@ -1,6 +1,22 @@
 <!-- templates/include/basic_info.html -->
 <td>{{ employee.id }}</td>
 <td>{{ employee.num }}</td>
+<td>
+    {% set employee_origin_id = employee.custom_fields | get_custom_field_value('社員ID') %}
+    {% if employee_origin_id.id != 'N/A' and employee_origin_id.id is not none %}
+        {{employee_origin_id.id}}
+    {% endif %}
+</td>
+<td>
+    {% if employee.name == employee.display_name %}
+        {{ employee.name }}
+    {% elif employee.name and employee.display_name %}
+        {{ employee.name }} | {{ employee.display_name }}
+    {% else %}
+        {{ employee.out_display_name }}
+    {% endif %}
+</td>
+<td>{{ employee.name_kana }}</td>
 <td>{{ employee.entry_date }}</td>
 <td>
     {% if employee.retire_status == '退職' %}
@@ -16,16 +32,6 @@
         <!-- N/A -->
     {% endif %}
 </td>
-<td>
-    {% if employee.name == employee.display_name %}
-        {{ employee.name }}
-    {% elif employee.name and employee.display_name %}
-        {{ employee.name }} | {{ employee.display_name }}
-    {% else %}
-        {{ employee.out_display_name }}
-    {% endif %}
-</td>
-<td>{{ employee.name_kana }}</td>
 <td>{{ employee.email if employee.email is not none else '' }}</td>
 <td>{{ employee.out_email }}</td>
 <td>{{ employee.sex }}</td>

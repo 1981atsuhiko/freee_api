@@ -15,7 +15,6 @@ class FreeeAPI:
         remaining = int(response.headers.get('X-RateLimit-Remaining', 0))
         reset = response.headers.get('X-RateLimit-Reset')
         remaining_requests = limit - remaining
-        logging.info(f"Rate Limit: {limit}, Remaining: {remaining}, Reset: {reset}")
 
     async def fetch(self, session, url, params):
         headers = {
@@ -23,6 +22,7 @@ class FreeeAPI:
             "Content-Type": "application/json",
             "FREEE-VERSION": "2022-02-01"
         }
+        # パラメータのログ出力
         async with session.get(url, headers=headers, params=params) as response:
             await self.log_rate_limit_info(response)
             response.raise_for_status()
@@ -56,7 +56,7 @@ class FreeeAPI:
 
         return all_employees
 
-    async def get_all_employees(self, company_id, limit=100, with_no_payroll_calculation=True):
+    async def get_all_employees(self, company_id, year, month, limit=100, with_no_payroll_calculation=True):
         url = f"{self.base_url}/companies/{company_id}/employees"
         all_employees = []
         offset = 0
@@ -64,6 +64,8 @@ class FreeeAPI:
         async with aiohttp.ClientSession() as session:
             while True:
                 params = {
+                    "year": year,
+                    "month": month,
                     "limit": limit,
                     "offset": offset,
                     "with_no_payroll_calculation": str(with_no_payroll_calculation).lower()
@@ -135,9 +137,8 @@ class FreeeAPI:
         params = {
             "company_id": company_id,
             "year": year,
-            "month": month - 1
+            "month": month
         }
-
         async with aiohttp.ClientSession() as session:
             data = await self.fetch(session, url, params)
             return data

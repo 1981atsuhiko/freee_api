@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_session import Session
 from dotenv import load_dotenv
 import os
 
@@ -7,11 +8,16 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
+    app.secret_key = os.urandom(24)
 
     # 環境変数からクライアントID、クライアントシークレット、リダイレクトURIを取得
     app.config['CLIENT_ID'] = os.getenv("CLIENT_ID")
     app.config['CLIENT_SECRET'] = os.getenv("CLIENT_SECRET")
     app.config['REDIRECT_URI'] = os.getenv("REDIRECT_URI")
+
+    # Flask-Sessionの設定
+    app.config['SESSION_TYPE'] = 'filesystem'
+    Session(app)
 
     # カスタムフィルタの定義
     def get_payment_amount(payments, name):
@@ -37,7 +43,14 @@ def create_app():
         for group in custom_fields.get('profile_custom_field_groups', []):
             for field in group.get('profile_custom_field_rules', []):
                 if field['name'] == field_name:
-                    return field['value'] or field['file_name']
+                    result = {
+                        'value': field['value'],
+                        'name': field['file_name'],
+                        'id': field['id']
+                    }
+                    if 'file_name' in field and field['file_name'] not in [None, 'N/A'] and '.pdf' in field['file_name']:
+                        result['fileType'] = 'pdf'
+                    return result
         return 'N/A'
 
     app.jinja_env.filters['get_payment_amount'] = get_payment_amount
