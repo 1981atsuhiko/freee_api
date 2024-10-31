@@ -1,10 +1,13 @@
 import sys
 import os
 
-# `app` ディレクトリをモジュール検索パスに追加
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+# モジュール検索パスを表示
+print("Current sys.path:", sys.path)
 
-from app import create_app
+# `__init__.py` ファイルが存在するディレクトリをモジュール検索パスに追加
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from __init__ import create_app
 
 app = create_app()
 

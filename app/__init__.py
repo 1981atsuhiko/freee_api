@@ -58,10 +58,10 @@ def create_app():
     app.jinja_env.filters['get_custom_field_value'] = get_custom_field_value
 
     # Blueprintの登録
-    from app.routes.home import home_bp
-    from app.routes.auth import auth_bp
-    from app.routes.employees import employees_bp
-    from app.routes.business import business_bp
+    from routes.home import home_bp
+    from routes.auth import auth_bp
+    from routes.employees import employees_bp
+    from routes.business import business_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)

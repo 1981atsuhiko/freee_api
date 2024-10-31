@@ -5,7 +5,6 @@ from datetime import datetime
 from api.employee_api import FreeeAPI
 from api.token_utils import get_valid_access_token
 from utils.db_utils import get_prefecture_name
-
 employees_bp = Blueprint('employees', __name__)
 
 @employees_bp.route('/employees', methods=['GET'])

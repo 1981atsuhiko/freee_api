@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 import logging
-
+print("employee_api.py is imported")
 # ログの設定
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
