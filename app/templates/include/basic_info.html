@@ -4,7 +4,7 @@
 <td>
     {% set employee_origin_id = employee.custom_fields | get_custom_field_value('社員ID') %}
     {% if employee_origin_id.id != 'N/A' and employee_origin_id.id is not none %}
-        {{employee_origin_id.id}}
+        {{employee_origin_id.value}}
     {% endif %}
 </td>
 <td>

@@ -1,4 +1,9 @@
 <!-- templates/include/payroll_info.html -->
+{% set table_grade = employee.custom_fields | get_custom_field_value('給与テーブル（級）') %}
+{% set table_number = employee.custom_fields | get_custom_field_value('給与テーブル（号）') %}
+<td>
+    {{ (table_grade.value ~ ' - ' ~ table_number.value) if table_grade.value != 'N/A' and table_grade.value is not none and table_number.value != 'N/A' and table_number.value is not none else '' }}
+</td>
 <td>{{ employee.payroll.gross_payment_amount }}</td>
 {% set basic_pay = employee.payroll.payments | get_payment_amount('基本給') %}
 <td>{{ basic_pay if basic_pay != 'N/A' else '' }}</td>

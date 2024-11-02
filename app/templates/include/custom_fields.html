@@ -1,134 +1,142 @@
 <!-- templates/include/custom_fields.html -->
+{% set recruit_route = employee.custom_fields | get_custom_field_value('採用ルート') %}
 <td>
-    {% set recruit_route = employee.custom_fields | get_custom_field_value('採用ルート') %}
     {% if recruit_route.value != 'N/A' and recruit_route.value is not none %}
         {{ recruit_route.value }}
     {% endif %}
 </td>
+{% set mail_pass = employee.custom_fields | get_custom_field_value('社用メールPW') %}
 <td>
-    {% set mail_pass = employee.custom_fields | get_custom_field_value('社用メールPW') %}
     {% if mail_pass.value != 'N/A' and mail_pass.value is not none %}
         {{ mail_pass.value }}
     {% endif %}
 </td>
+{% set health_certificate = employee.custom_fields | get_custom_field_value('入社時健康診断書') %}
 <td>
-    {% set health_certificate = employee.custom_fields | get_custom_field_value('入社時健康診断書') %}
     {% if health_certificate.name != 'N/A' and health_certificate.name is not none %}
         {{ health_certificate.id }}
     {% endif %}
 </td>
+{% set personal_agreement = employee.custom_fields | get_custom_field_value('個人情報取り扱い同意書(従業員)') %}
 <td>
-    {% set personal_agreement = employee.custom_fields | get_custom_field_value('個人情報取り扱い同意書(従業員)') %}
     {% if personal_agreement.name != 'N/A' and personal_agreement.name is not none %}
         {{ personal_agreement.id }}
     {% endif %}
 </td>
+{% set resident = employee.custom_fields | get_custom_field_value('住民票') %}
 <td>
-    {% set resident = employee.custom_fields | get_custom_field_value('住民票') %}
     {% if resident.name != 'N/A' and resident.vanamelue is not none %}
         {{ resident.id }}
     {% endif %}
 </td>
+{% set guarantee = employee.custom_fields | get_custom_field_value('身元保証書') %}
 <td>
-    {% set guarantee = employee.custom_fields | get_custom_field_value('身元保証書') %}
     {% if guarantee.name != 'N/A' and guarantee.name is not none %}
         {{ guarantee.id }}
     {% endif %}
 </td>
+{% set confidentiality = employee.custom_fields | get_custom_field_value('秘密保持契約_誓約書') %}
 <td>
-    {% set confidentiality = employee.custom_fields | get_custom_field_value('秘密保持契約_誓約書') %}
     {% if confidentiality.name != 'N/A' and confidentiality.name is not none %}
         {{ confidentiality.id }}
     {% endif %}
 </td>
+{% set qualifications = employee.custom_fields | get_custom_field_value('入社時所持資格') %}
 <td>
-    {% set qualifications = employee.custom_fields | get_custom_field_value('入社時所持資格') %}
     {% if qualifications.value != 'N/A' and qualifications.value is not none %}
         {{ qualifications.value }}
     {% endif %}
 </td>
+{% set skill_sheet = employee.custom_fields | get_custom_field_value('スキルシート') %}
 <td>
-    {% set skill_sheet = employee.custom_fields | get_custom_field_value('スキルシート') %}
     {% if skill_sheet.value != 'N/A' and skill_sheet.value is not none and skill_sheet != 'N/A' and skill_sheet is not none %}
         <a href="{{ skill_sheet.value }}" target="_blank">スキルシート</a>
     {% endif %}
 </td>
+{% set trouble_folder = employee.custom_fields | get_custom_field_value('トラブルフォルダURL') %}
 <td>
-    {% set trouble_folder = employee.custom_fields | get_custom_field_value('トラブルフォルダURL') %}
     {% if trouble_folder.value != 'N/A' and trouble_folder.value is not none and trouble_folder != 'N/A' and trouble_folder is not none%}
         <a href="{{ trouble_folder.value }}" target="_blank">トラブルフォルダURL</a>
     {% endif %}
 </td>
+{% set improvement_request = employee.custom_fields | get_custom_field_value('業務改善依頼書') %}
 <td>
-    {% set improvement_request = employee.custom_fields | get_custom_field_value('業務改善依頼書') %}
     {% if improvement_request.value != 'N/A' and improvement_request.value is not none %}
         {{ improvement_request.id }}
     {% endif %}
 </td>
+{% set participation_date = employee.custom_fields | get_custom_field_value('参画日') %}
 <td>
-    {% set participation_date = employee.custom_fields | get_custom_field_value('参画日') %}
     {% if participation_date.value != 'N/A' and participation_date.value is not none %}
         {{ participation_date.value }}
     {% endif %}
 </td>
+{% set participation_system = employee.custom_fields | get_custom_field_value('参画体系') %}
 <td>
-    {% set participation_system = employee.custom_fields | get_custom_field_value('参画体系') %}
     {% if participation_system.value != 'N/A' and participation_system.value is not none %}
         {{ participation_system.value }}
     {% endif %}
 </td>
+{% set unit_price = employee.custom_fields | get_custom_field_value('単価情報') %}
 <td>
-    {% set unit_price = employee.custom_fields | get_custom_field_value('単価情報') %}
     {% if unit_price.value != 'N/A' and unit_price.value is not none %}
         {{ unit_price.value }}
     {% endif %}
 </td>
+{% set industry = employee.custom_fields | get_custom_field_value('業種') %}
 <td>
-    {% set industry = employee.custom_fields | get_custom_field_value('業種') %}
     {% if industry.value != 'N/A' and industry.value is not none %}
         {{ industry.value }}
     {% endif %}
 </td>
+{% set phase = employee.custom_fields | get_custom_field_value('担当フェーズ') %}
 <td>
-    {% set phase = employee.custom_fields | get_custom_field_value('担当フェーズ') %}
     {% if phase.value != 'N/A' and phase.value is not none %}
         {{ phase.value }}
     {% endif %}
 </td>
+{% set position = employee.custom_fields | get_custom_field_value('ポジション') %}
 <td>
-    {% set position = employee.custom_fields | get_custom_field_value('ポジション') %}
     {% if position.value != 'N/A' and position.value is not none %}
         {{ position.value }}
     {% endif %}
 </td>
+{% set lang_os1 = employee.custom_fields | get_custom_field_value('言語・ＯＳ等') %}
 <td>
-    {% set lang_os1 = employee.custom_fields | get_custom_field_value('言語・ＯＳ等') %}
     {% if lang_os1.value != 'N/A' and lang_os1.value is not none %}
         {{ lang_os1.value }}
     {% endif %}
 </td>
+{% set experience = employee.custom_fields | get_custom_field_value('経験年数') %}
 <td>
-    {% set experience = employee.custom_fields | get_custom_field_value('経験年数') %}
     {% if experience.value != 'N/A' and experience.value is not none %}
-        {{ experience.value }}
+        {{ experience.value }} 年
     {% endif %}
 </td>
-<td>{{ employee.custom_fields | get_custom_field_value('ポジション') if employee.custom_fields | get_custom_field_value('ポジション') != 'N/A' and employee.custom_fields | get_custom_field_value('ポジション') is not none else '' }}</td>
-<td>{{ employee.custom_fields | get_custom_field_value('所持資格情報') if employee.custom_fields | get_custom_field_value('所持資格情報') != 'N/A' and employee.custom_fields | get_custom_field_value('所持資格情報') is not none else '' }}</td>
-<td>{{ employee.custom_fields | get_custom_field_value('技術フェーズ') if employee.custom_fields | get_custom_field_value('技術フェーズ') != 'N/A' and employee.custom_fields | get_custom_field_value('技術フェーズ') is not none else '' }}</td>
-<td>{{ employee.custom_fields | get_custom_field_value('言語・OS') if employee.custom_fields | get_custom_field_value('言語・OS') != 'N/A' and employee.custom_fields | get_custom_field_value('言語・OS') is not none else '' }}</td>
+{% set ex_position = employee.custom_fields | get_custom_field_value('ポジション') %}
+<td>
+    {{ ex_position.value  if ex_position.value != 'N/A' and ex_position.value is not none else '' }}
+</td>
+{% set ex_qualification = employee.custom_fields | get_custom_field_value('所持資格情報') %}
+<td>
+    {{ ex_qualification.value if ex_qualification.value != 'N/A' and ex_qualification.value is not none else '' }}
+</td>
+{% set ex_phase = employee.custom_fields | get_custom_field_value('技術フェーズ') %}
+<td>
+    {{ ex_phase.value if ex_phase.value != 'N/A' and ex_phase.value is not none else '' }}
+</td>
+{% set ex_lang = employee.custom_fields | get_custom_field_value('言語・OSs') %}
+<td>
+    {{ ex_lang.value if ex_lang.value != 'N/A' and ex_lang.value is not none else '' }}
+</td>
 <td>
     {% set roadmap = employee.custom_fields | get_custom_field_value('ロードマップ(URL)') %}
     {% if roadmap != 'N/A' and roadmap is not none %}
         <a href="{{ roadmap }}" target="_blank">ロードマップ</a>
     {% endif %}
 </td>
+
 <td>{{ employee.custom_fields | get_custom_field_value('賞与支給') if employee.custom_fields | get_custom_field_value('賞与支給') != 'N/A' and employee.custom_fields | get_custom_field_value('賞与支給') is not none else '' }}</td>
-<td>
-    {% set table_grade = employee.custom_fields | get_custom_field_value('給与テーブル（級）') %}
-    {% set table_number = employee.custom_fields | get_custom_field_value('給与テーブル（号）') %}
-    {{ (table_grade ~ ' - ' ~ table_number) if table_grade != 'N/A' and table_grade is not none and table_number != 'N/A' and table_number is not none else '' }}
-</td>
 <td>{{ employee.custom_fields | get_custom_field_value('内定通知書') if employee.custom_fields | get_custom_field_value('内定通知書') != 'N/A' and employee.custom_fields | get_custom_field_value('内定通知書') is not none else '' }}</td>
 <td>{{ employee.custom_fields | get_custom_field_value('雇用契約書_内定時(労働条件通知書)') if employee.custom_fields | get_custom_field_value('雇用契約書_内定時(労働条件通知書)') != 'N/A' and employee.custom_fields | get_custom_field_value('雇用契約書_内定時(労働条件通知書)') is not none else '' }}</td>
 <td>{{ employee.custom_fields | get_custom_field_value('雇用契約書_更新時(労働条件通知書）') if employee.custom_fields | get_custom_field_value('雇用契約書_更新時(労働条件通知書）') != 'N/A' and employee.custom_fields | get_custom_field_value('雇用契約書_更新時(労働条件通知書）') is not none else '' }}</td>
